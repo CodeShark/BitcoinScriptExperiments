@@ -7,9 +7,10 @@ LIBS = \
     -lCoinCore \
     -lCoinQ \
     -lboost_system$(BOOST_SUFFIX) \
+    -lboost_regex$(BOOST_SUFFIX) \
     -lcrypto
 
-all: build/1of2in2of3${EXE_EXT}
+all: build/nestedmofn${EXE_EXT}
 
-build/1of2in2of3${EXE_EXT}: src/1of2in2of3.cpp
+build/nestedmofn${EXE_EXT}: src/nestedmofn.cpp
 	$(CXX) $(CXX_FLAGS) $(INCLUDE_PATH) $^ -o $@ $(LIBS)
