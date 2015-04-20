@@ -10,7 +10,10 @@ LIBS = \
     -lboost_regex$(BOOST_SUFFIX) \
     -lcrypto
 
-all: build/nestedmofn${EXE_EXT}
+all: build/nestedmofn${EXE_EXT} build/signnestedmofn${EXE_EXT}
 
 build/nestedmofn${EXE_EXT}: src/nestedmofn.cpp
+	$(CXX) $(CXX_FLAGS) $(INCLUDE_PATH) $^ -o $@ $(LIBS)
+
+build/signnestedmofn${EXE_EXT}: src/signnestedmofn.cpp
 	$(CXX) $(CXX_FLAGS) $(INCLUDE_PATH) $^ -o $@ $(LIBS)
