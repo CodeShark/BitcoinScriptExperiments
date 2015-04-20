@@ -6,6 +6,8 @@
 
 #include <CoinQ/CoinQ_script.h>
 
+const unsigned char ADDRESS_VERSIONS[] = {0, 5};
+
 using namespace Coin;
 using namespace CoinCrypto;
 using namespace CoinQ::Script;
@@ -48,12 +50,17 @@ int main(int argc, char* argv[])
         uchar_vector redeemscript;
         redeemscript.push_back(om + OP_1_OFFSET);
         redeemscript.push_back(OP_TOALTSTACK);
-        for (int i = 0; i < nPubKeys - 1; i++)
+        for (int i = 0; i < on - 1; i++)
         {
             redeemscript.push_back(im + OP_1_OFFSET);
-            redeemscript += opPushData(pubkeys[i].size() + OP_1_OFFSET);
-            redeemscript += pubkeys[i];
+            for (int j = 0; j < in; j++)
+            {
+                int k = in * i + j;
+                redeemscript += opPushData(pubkeys[k].size());
+                redeemscript += pubkeys[k];
+            }
             redeemscript.push_back(in + OP_1_OFFSET);
+            redeemscript.push_back(OP_CHECKMULTISIG);
             redeemscript.push_back(OP_IF);
                 redeemscript.push_back(OP_FROMALTSTACK);
                 redeemscript.push_back(OP_1SUB);
@@ -62,20 +69,42 @@ int main(int argc, char* argv[])
                     redeemscript.push_back(OP_TOALTSTACK);
         }
         redeemscript.push_back(im + OP_1_OFFSET);
-        redeemscript += opPushData(pubkeys[nPubKeys - 1].size());
-        redeemscript += pubkeys[nPubKeys - 1];
+        for (int j = 0; j < in; j++)
+        {
+            int k = in * (on - 1) + j;
+            redeemscript += opPushData(pubkeys[k].size());
+            redeemscript += pubkeys[k];
+        }
         redeemscript.push_back(in + OP_1_OFFSET);
         redeemscript.push_back(OP_IF);
             redeemscript.push_back(OP_FROMALTSTACK);
             redeemscript.push_back(OP_1SUB);
             redeemscript.push_back(OP_TOALTSTACK);
+        redeemscript.push_back(OP_ENDIF);
 
-        for (int i = 1; i < 2*nPubKeys; i++) { redeemscript.push_back(OP_ENDIF); }
+        for (int i = 2; i < 2*on; i++) { redeemscript.push_back(OP_ENDIF); }
 
         redeemscript.push_back(OP_FROMALTSTACK);
         redeemscript.push_back(OP_NOT);
 
-        cout << "redeemscript: " << redeemscript.getHex() << endl;
+        cout << endl << "redeemscript: " << redeemscript.getHex() << endl;
+
+        uchar_vector txoutscript;
+        txoutscript.push_back(OP_HASH160);
+        txoutscript.push_back(0x14);
+        txoutscript += ripemd160(sha256(redeemscript));
+        txoutscript.push_back(OP_EQUAL);
+        cout << endl << "address: " << getAddressForTxOutScript(txoutscript, ADDRESS_VERSIONS) << endl;
+
+        OutPoint outPoint(bytes_t(32, 0), 0);
+        TxIn txIn(outPoint, redeemscript, 0);
+        TxOut txOut(100000, bytes_t());
+        Transaction tx;
+        tx.version = 0;
+        tx.inputs.push_back(txIn);
+        tx.outputs.push_back(txOut);
+        tx.lockTime = 0xffffffff;
+        cout << endl << "tx: " << tx.getSerialized().getHex() << endl; 
     }
     catch (const exception& e)
     {
