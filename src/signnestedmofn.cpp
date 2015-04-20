@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
             tx.version = 1;
             tx.inputs.push_back(txIn);
             tx.outputs.push_back(txOut);
-            tx.lockTime = 0xffffffff;
+            tx.lockTime = 0;
 
             signingHash = tx.getHashWithAppendedCode(SIGHASH_ALL);
         }
@@ -65,6 +65,7 @@ int main(int argc, char* argv[])
                 secp256k1_key signingKey;
                 signingKey.setPrivKey(privkey);
                 bytes_t sig = secp256k1_sign(signingKey, signingHash);
+                sig.push_back(SIGHASH_ALL);
                 txinscript += opPushData(sig.size());
                 txinscript += sig;
             } 

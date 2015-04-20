@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
         uchar_vector redeemscript;
         redeemscript.push_back(om + OP_1_OFFSET);
         redeemscript.push_back(OP_TOALTSTACK);
-        for (int i = 0; i < on - 1; i++)
+        for (int i = 0; i < on; i++)
         {
             redeemscript.push_back(im + OP_1_OFFSET);
             for (int j = 0; j < in; j++)
@@ -64,26 +64,9 @@ int main(int argc, char* argv[])
             redeemscript.push_back(OP_IF);
                 redeemscript.push_back(OP_FROMALTSTACK);
                 redeemscript.push_back(OP_1SUB);
-                redeemscript.push_back(OP_IFDUP);
-                redeemscript.push_back(OP_IF);
-                    redeemscript.push_back(OP_TOALTSTACK);
+                redeemscript.push_back(OP_TOALTSTACK);
+            redeemscript.push_back(OP_ENDIF);
         }
-        redeemscript.push_back(im + OP_1_OFFSET);
-        for (int j = 0; j < in; j++)
-        {
-            int k = in * (on - 1) + j;
-            redeemscript += opPushData(pubkeys[k].size());
-            redeemscript += pubkeys[k];
-        }
-        redeemscript.push_back(in + OP_1_OFFSET);
-        redeemscript.push_back(OP_IF);
-            redeemscript.push_back(OP_FROMALTSTACK);
-            redeemscript.push_back(OP_1SUB);
-            redeemscript.push_back(OP_TOALTSTACK);
-        redeemscript.push_back(OP_ENDIF);
-
-        for (int i = 2; i < 2*on; i++) { redeemscript.push_back(OP_ENDIF); }
-
         redeemscript.push_back(OP_FROMALTSTACK);
         redeemscript.push_back(OP_NOT);
 
