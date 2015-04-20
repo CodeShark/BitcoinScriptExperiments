@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
         int pos = 6;
         while (pos < argc)
         {
-            int n = strtoul(argv[pos], NULL, 0);
+            int n = strtol(argv[pos], NULL, 0);
             if (n < 1 || n > argc - pos) throw runtime_error("Invalid private key count.");
 
             pos++;
@@ -60,14 +60,19 @@ int main(int argc, char* argv[])
             for (int k = 0; k < n; k++)
             {
                 uchar_vector privkey(argv[pos++]);
-                if (privkey.size() != 32) throw runtime_error("Invalid private key.");
-
-                secp256k1_key signingKey;
-                signingKey.setPrivKey(privkey);
-                bytes_t sig = secp256k1_sign(signingKey, signingHash);
-                sig.push_back(SIGHASH_ALL);
-                txinscript += opPushData(sig.size());
-                txinscript += sig;
+                if (privkey.size() == 32)
+                {
+                    secp256k1_key signingKey;
+                    signingKey.setPrivKey(privkey);
+                    bytes_t sig = secp256k1_sign(signingKey, signingHash);
+                    sig.push_back(SIGHASH_ALL);
+                    txinscript += opPushData(sig.size());
+                    txinscript += sig;
+                }
+                else
+                {
+                    txinscript.push_back(OP_0);
+                }
             } 
         }
 
