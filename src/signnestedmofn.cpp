@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
             TxIn txIn(outPoint, redeemscript, 0);
 
             Transaction tx;
-            tx.version = 0;
+            tx.version = 1;
             tx.inputs.push_back(txIn);
             tx.outputs.push_back(txOut);
             tx.lockTime = 0xffffffff;
@@ -76,10 +76,10 @@ int main(int argc, char* argv[])
         TxIn txIn(outPoint, txinscript, 0);
 
         Transaction tx;
-        tx.version = 0;
+        tx.version = 1;
         tx.inputs.push_back(txIn);
         tx.outputs.push_back(txOut);
-        tx.lockTime = 0xffffffff;
+        tx.lockTime = 0;
 
         cout << endl << "tx: " << tx.getSerialized().getHex() << endl; 
     }
