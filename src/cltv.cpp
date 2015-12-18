@@ -35,26 +35,25 @@ int main(int argc, char* argv[])
         int64_t locktime = strtoll(argv[3], NULL, 0);
         if (locktime < 0 || locktime > 0xffffffff) throw runtime_error("Invalid locktime.");
 
-        uchar_vector unlocked_pubkey_hash = ripemd160(sha256(unlocked_pubkey));
-        uchar_vector locked_pubkey_hash = ripemd160(sha256(locked_pubkey));
         uchar_vector serialized_locktime = CScriptNum::serialize(locktime);
 
         uchar_vector redeemscript;
-
-        // Check whether we're using the locktime pubkey
-        redeemscript.push_back(OP_DUP);
-        redeemscript.push_back(OP_HASH160);
-        redeemscript += opPushData(locked_pubkey_hash.size());
-        redeemscript += locked_pubkey_hash;
-        redeemscript.push_back(OP_EQUAL);
+        redeemscript += opPushData(locked_pubkey.size());
+        redeemscript += locked_pubkey;
+        redeemscript.push_back(OP_CHECKSIG);
         redeemscript.push_back(OP_IF);
-            // We're using the locktime pubkey
+            // We're using the locked pubkey
             redeemscript += opPushData(serialized_locktime.size());
             redeemscript += serialized_locktime;
             redeemscript.push_back(OP_CHECKLOCKTIMEVERIFY);
             redeemscript.push_back(OP_DROP);
+            redeemscript.push_back(OP_1);
+        redeemscript.push_back(OP_ELSE);
+            // We're using the unlocked pubkey
+            redeemscript += opPushData(unlocked_pubkey.size());
+            redeemscript += unlocked_pubkey;
+            redeemscript.push_back(OP_CHECKSIG);
         redeemscript.push_back(OP_ENDIF);
-        redeemscript.push_back(OP_CHECKSIG);
 
         cout << endl << "redeemscript: " << redeemscript.getHex() << endl;
 
