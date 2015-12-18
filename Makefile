@@ -4,8 +4,8 @@ INCLUDE_PATH += \
     -Isrc
 
 LIBS = \
-    -lCoinCore \
     -lCoinQ \
+    -lCoinCore \
     -lboost_system$(BOOST_SUFFIX) \
     -lboost_regex$(BOOST_SUFFIX) \
     -lcrypto
