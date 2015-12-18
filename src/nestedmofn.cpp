@@ -2,7 +2,7 @@
 #include <stdexcept>
 
 #include <CoinCore/hash.h>
-#include <CoinCore/secp256k1.h>
+#include <CoinCore/secp256k1_openssl.h>
 
 #include <CoinQ/CoinQ_script.h>
 
