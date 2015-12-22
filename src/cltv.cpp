@@ -38,6 +38,7 @@ int main(int argc, char* argv[])
         uchar_vector serialized_locktime = CScriptNum::serialize(locktime);
 
         uchar_vector redeemscript;
+        redeemscript.push_back(OP_DUP);
         redeemscript += opPushData(locked_pubkey.size());
         redeemscript += locked_pubkey;
         redeemscript.push_back(OP_CHECKSIG);
@@ -47,7 +48,6 @@ int main(int argc, char* argv[])
             redeemscript += serialized_locktime;
             redeemscript.push_back(OP_CHECKLOCKTIMEVERIFY);
             redeemscript.push_back(OP_DROP);
-            redeemscript.push_back(OP_1);
         redeemscript.push_back(OP_ELSE);
             // We're using the unlocked pubkey
             redeemscript += opPushData(unlocked_pubkey.size());
