@@ -54,19 +54,19 @@ int main(int argc, char* argv[])
         witnessscript += opPushData(scripthash.size());
         witnessscript += scripthash;
 
-        bytes_t signingHash;
-        TxIn txIn(outPoint, witnessscript, 0);
+        bytes_t sig;
+        {
+            TxIn txIn(outPoint, scripthash, 0);
 
-        Transaction tx;
-        tx.version = 1;
-        tx.inputs.push_back(txIn);
-        tx.outputs.push_back(txOut);
+            Transaction tx;
+            tx.version = 1;
+            tx.inputs.push_back(txIn);
+            tx.outputs.push_back(txOut);
 
-        cout << endl << "tx: " << tx.getSerialized().getHex() << endl;
-
-        signingHash = tx.getHashWithAppendedCode(SIGHASH_ALL);
-        bytes_t sig = secp256k1_sign(signingKey, signingHash);
-        sig.push_back(SIGHASH_ALL);
+            bytes_t signingHash = tx.getHashWithAppendedCode(SIGHASH_ALL);
+            sig = secp256k1_sign(signingKey, signingHash);
+            sig.push_back(SIGHASH_ALL);
+        } 
 
         uchar_vector witness;
         witness += VarInt(2).getSerialized();
@@ -78,6 +78,13 @@ int main(int argc, char* argv[])
         witness += redeemscript;
 
         cout << endl << "witness: " << witness.getHex() << endl;
+
+        TxIn txIn(outPoint, witnessscript, 0);
+
+        Transaction tx;
+        tx.version = 1;
+        tx.inputs.push_back(txIn);
+        tx.outputs.push_back(txOut);
 
         // version
         uchar_vector rval = uint_to_vch(tx.version, _BIG_ENDIAN);
