@@ -10,7 +10,7 @@ LIBS = \
     -lboost_regex$(BOOST_SUFFIX) \
     -lcrypto
 
-all: build/nestedmofn${EXE_EXT} build/signnestedmofn${EXE_EXT} build/cltv${EXE_EXT} build/signcltv${EXE_EXT}
+all: build/nestedmofn${EXE_EXT} build/signnestedmofn${EXE_EXT} build/cltv${EXE_EXT} build/signcltv${EXE_EXT} build/witness${EXE_EXT}
 
 build/nestedmofn${EXE_EXT}: src/nestedmofn.cpp
 	$(CXX) $(CXX_FLAGS) $(INCLUDE_PATH) $^ -o $@ $(LIBS)
@@ -22,4 +22,7 @@ build/cltv${EXE_EXT}: src/cltv.cpp
 	$(CXX) $(CXX_FLAGS) $(INCLUDE_PATH) $^ -o $@ $(LIBS)
 
 build/signcltv${EXE_EXT}: src/signcltv.cpp
+	$(CXX) $(CXX_FLAGS) $(INCLUDE_PATH) $^ -o $@ $(LIBS)
+
+build/witness${EXE_EXT}: src/witness.cpp
 	$(CXX) $(CXX_FLAGS) $(INCLUDE_PATH) $^ -o $@ $(LIBS)
