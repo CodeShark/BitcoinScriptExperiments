@@ -70,10 +70,8 @@ int main(int argc, char* argv[])
 
         uchar_vector witness;
         witness += VarInt(2).getSerialized();
-        uchar_vector sig2;
-        sig2.push_back(1);
-        witness += VarInt(sig2.size()).getSerialized();
-        witness += sig2;
+        witness += VarInt(sig.size()).getSerialized();
+        witness += sig;
         witness += VarInt(redeemscript.size()).getSerialized();
         witness += redeemscript;
 
@@ -87,7 +85,7 @@ int main(int argc, char* argv[])
         tx.outputs.push_back(txOut);
 
         // version
-        uchar_vector rval = uint_to_vch(tx.version, _BIG_ENDIAN);
+        uchar_vector rval = uint_to_vch(tx.version, 2);
 
         // mask and flag
         rval.push_back(0);
@@ -108,7 +106,7 @@ int main(int argc, char* argv[])
         rval += witness;
 
         // lock time
-        rval += uint_to_vch(tx.lockTime, _BIG_ENDIAN);
+        rval += uint_to_vch(tx.lockTime, 2);
 
         cout << endl << "tx: " << rval.getHex() << endl;
     }
