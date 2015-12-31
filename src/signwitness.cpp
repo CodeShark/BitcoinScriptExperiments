@@ -17,9 +17,9 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-    if (argc != 6)
+    if (argc != 7)
     {
-        cerr << "# Usage: " << argv[0] << " <address> <amount> <outpoint hash> <outpoint index> <privkey>" << endl;
+        cerr << "# Usage: " << argv[0] << " <address> <amount> <outpoint hash> <outpoint index> <outpoint amount> <privkey>" << endl;
         return -1;
     }
 
@@ -34,7 +34,8 @@ int main(int argc, char* argv[])
         uint32_t outpointIndex = strtoul(argv[4], NULL, 0);
         OutPoint outPoint(outpointHash, outpointIndex);
 
-        uchar_vector privkey(argv[5]);
+        uint64_t outpointamount = strtoull(argv[5], NULL, 0);
+        uchar_vector privkey(argv[6]);
         if (privkey.size() != 32) throw runtime_error("Invalid private key length.");
 
         secp256k1_key signingKey;
@@ -93,7 +94,7 @@ int main(int argc, char* argv[])
         //ss += VarInt(redeemscript.size()).getSerialized();
         ss += uint_to_vch((uint32_t)redeemscript.size(), LITTLE_ENDIAN_);
         ss += redeemscript;
-        ss += uint_to_vch(amount, LITTLE_ENDIAN_);
+        ss += uint_to_vch(outpointamount, LITTLE_ENDIAN_);
         ss += uint_to_vch(0, LITTLE_ENDIAN_);
         ss += hashOutputs;
         ss += uint_to_vch(0, LITTLE_ENDIAN_);
