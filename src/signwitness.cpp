@@ -54,19 +54,46 @@ int main(int argc, char* argv[])
         witnessscript += opPushData(scripthash.size());
         witnessscript += scripthash;
 
-        bytes_t sig;
+        uchar_vector hashPrevouts;
         {
-            TxIn txIn(outPoint, scripthash, 0);
+            uchar_vector ss;
+            ss += VarInt(1).getSerialized();
+            ss += outPoint.getSerialized();
+            hashPrevouts = sha256_2(ss);
+        }
 
-            Transaction tx;
-            tx.version = 1;
-            tx.inputs.push_back(txIn);
-            tx.outputs.push_back(txOut);
+        uchar_vector hashSequence;
+        {
+            uchar_vector ss;
+            ss += VarInt(1).getSerialized();
+            ss += uint_to_vch(0, 2);
+            hashSequence = sha256_2(ss);
+        }
 
-            bytes_t signingHash = tx.getHashWithAppendedCode(SIGHASH_ALL);
-            sig = secp256k1_sign(signingKey, signingHash);
-            sig.push_back(SIGHASH_ALL);
-        } 
+        uchar_vector hashOutputs;
+        {
+            uchar_vector ss;
+            ss += VarInt(1).getSerialized();
+            ss += txOut.getSerialized();
+            hashOutputs = sha256_2(ss);
+        }
+
+        uchar_vector ss;
+        ss += uint_to_vch(1, 2);
+        ss += hashPrevouts;
+        ss += hashSequence;
+        ss += outPoint.getSerialized();
+        ss += VarInt(redeemscript.size()).getSerialized();
+        ss += redeemscript;
+        ss += uint_to_vch(amount, 2);
+        ss += uint_to_vch(0, 2);
+        ss += hashOutputs;
+        ss += uint_to_vch(0, 2);
+        ss += uint_to_vch((uint32_t)SIGHASH_ALL, 2);
+        uchar_vector signingHash = sha256_2(ss);
+
+        bytes_t sig = secp256k1_sign(signingKey, signingHash);
+        sig.push_back(SIGHASH_ALL);
 
         uchar_vector witness;
         witness += VarInt(2).getSerialized();
