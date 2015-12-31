@@ -53,6 +53,9 @@ int main(int argc, char* argv[])
         witnessscript.push_back(OP_1);
         witnessscript += opPushData(scripthash.size());
         witnessscript += scripthash;
+        uchar_vector scriptsig;
+        scriptsig += opPushData(witnessscript.size());
+        scriptsig += witnessscript;
 
         uchar_vector hashPrevouts;
         {
@@ -104,7 +107,7 @@ int main(int argc, char* argv[])
 
         cout << endl << "witness: " << witness.getHex() << endl;
 
-        TxIn txIn(outPoint, witnessscript, 0);
+        TxIn txIn(outPoint, scriptsig, 0);
 
         Transaction tx;
         tx.version = 1;
