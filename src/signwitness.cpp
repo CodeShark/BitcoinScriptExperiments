@@ -59,8 +59,6 @@ int main(int argc, char* argv[])
         uchar_vector hashPrevouts;
         {
             uchar_vector ss;
-            //ss += VarInt(1).getSerialized();
-            ss += uint_to_vch(1, LITTLE_ENDIAN_);
             ss += outPoint.getSerialized();
             cout << "prevouts: " << ss.getHex() << endl;
             hashPrevouts = sha256_2(ss);
@@ -69,9 +67,7 @@ int main(int argc, char* argv[])
         uchar_vector hashSequence;
         {
             uchar_vector ss;
-            //ss += VarInt(1).getSerialized();
-            ss += uint_to_vch(1, LITTLE_ENDIAN_);
-            ss += uint_to_vch(0, LITTLE_ENDIAN_);
+            ss += uint_to_vch<uint32_t>(0, LITTLE_ENDIAN_); // sequence
             cout << "sequence: " << ss.getHex() << endl;
             hashSequence = sha256_2(ss);
         }
@@ -79,26 +75,23 @@ int main(int argc, char* argv[])
         uchar_vector hashOutputs;
         {
             uchar_vector ss;
-            //ss += VarInt(1).getSerialized();
-            ss += uint_to_vch(1, LITTLE_ENDIAN_);
             ss += txOut.getSerialized();
             cout << "outputs: " << ss.getHex() << endl;
             hashOutputs = sha256_2(ss);
         }
 
         uchar_vector ss;
-        ss += uint_to_vch(1, LITTLE_ENDIAN_);
+        ss += uint_to_vch<uint32_t>(1, LITTLE_ENDIAN_); // tx version
         ss += hashPrevouts;
         ss += hashSequence;
         ss += outPoint.getSerialized();
-        //ss += VarInt(redeemscript.size()).getSerialized();
-        ss += uint_to_vch((uint32_t)redeemscript.size(), LITTLE_ENDIAN_);
+        ss += VarInt(redeemscript.size()).getSerialized();
         ss += redeemscript;
         ss += uint_to_vch(outpointamount, LITTLE_ENDIAN_);
-        ss += uint_to_vch(0, LITTLE_ENDIAN_);
+        ss += uint_to_vch<uint32_t>(0, LITTLE_ENDIAN_); // sequence
         ss += hashOutputs;
-        ss += uint_to_vch(0, LITTLE_ENDIAN_);
-        ss += uint_to_vch((uint32_t)SIGHASH_ALL, LITTLE_ENDIAN_);
+        ss += uint_to_vch<uint32_t>(0, LITTLE_ENDIAN_); // locktime
+        ss += uint_to_vch<uint32_t>(SIGHASH_ALL, LITTLE_ENDIAN_);
         cout << "data to hash: " << ss.getHex() << endl;
         uchar_vector signingHash = sha256_2(ss);
 
