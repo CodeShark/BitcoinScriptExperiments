@@ -8,8 +8,6 @@
 #include <iostream>
 #include <stdexcept>
 
-const unsigned char ADDRESS_VERSIONS[] = {30, 50};
-
 using namespace Coin;
 using namespace CoinCrypto;
 using namespace CoinQ::Script;
@@ -18,26 +16,27 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-    if (argc != 4)
+    if (argc < 4 || argc > 5)
     {
-        cerr << "# Usage: " << argv[0] << " <rawtx> <outpoint amount> <privkey>" << endl;
+        cerr << "# Usage: " << argv[0] << " <rawtx> <outpoint amount> <privkey> [verbose = 0]" << endl;
         return -1;
     }
 
     try
     {
-        Transaction tx(uchar_vector(argv[1]));
+        uchar_vector rawtx(argv[1]);
+        Transaction tx(rawtx);
         if (tx.inputs.size() != 1)
-            throw runtime_error("Invalid transaction type.");
+            throw runtime_error("Invalid transaction type 1.");
 
         if (tx.witness.txinwits.size() != 1)
-            throw runtime_error("Invalid transaction type.");
+            throw runtime_error("Invalid transaction type 2.");
 
         std::vector<uchar_vector>& stack = tx.witness.txinwits[0].scriptWitness.stack;
         if (stack.size() == 0)
             throw runtime_error("Invalid witness type.");
 
-        int pos = 0;
+        uint pos = 0;
         uchar_vector redeemscript = stack.back();
         if (redeemscript.size() < 35)
             throw runtime_error("Invalid redeemscript.");
@@ -45,7 +44,7 @@ int main(int argc, char* argv[])
         uchar_vector witnessscript;
         witnessscript << OP_1 << pushStackItem(sha256(redeemscript));
 
-        if (tx.inputs[0].scriptSig != pushStackItem(witnessscript));
+        if (tx.inputs[0].scriptSig != pushStackItem(witnessscript))
             throw runtime_error("Invalid scriptSig.");
 
         int minsigs = redeemscript[pos] - OP_1_OFFSET; pos++;
@@ -82,31 +81,63 @@ int main(int argc, char* argv[])
         uchar_vector pubkey = signingKey.getPubKey();
 
         int sigindex = 0;
-        for (; sigindex < pubkeys.size(); sigindex++)
+        for (; sigindex < (int)pubkeys.size(); sigindex++)
         {
             if (pubkeys[sigindex] == pubkey) break;
         }
         if (sigindex == pubkeys.size())
             throw runtime_error("No matching pubkey for privkey.");
 
-        TxIn txIn(outPoint, pushStackItem(witnessscript), 0);
-
-        Transaction tx;
-        tx.version = 1;
-        tx.inputs.push_back(txIn);
-        tx.outputs.push_back(txOut);
-        tx.lockTime = 0;
-
         uchar_vector signingHash = tx.getSigHash(Coin::SIGHASH_ALL, 0, redeemscript, outpointamount);
-        bytes_t sig = secp256k1_sign_rfc6979(signingKey, signingHash);
-        sig.push_back(Coin::SIGHASH_ALL);
+        int nextsig = 0;
+        bool didSign = false;
+        vector<uchar_vector> newStack;
+        for (int i = 0; i < (int)stack.size() - 1; i++)
+        {
+            if (stack[i].empty())
+                throw runtime_error("Invalid signature.");
 
-        TxInWitness txinwit;
-        txinwit.push(sig);
-        txinwit.push(redeemscript);
-        tx.witness.txinwits.push_back(txinwit);
+            if (stack[i].back() != Coin::SIGHASH_ALL)
+                throw runtime_error("Unsupported sighash type.");
 
-        bool verbose = false;
+            uchar_vector sig(stack[i].begin(), stack[i].end() - 1);
+
+            int j = nextsig;
+            for (; j < (int)pubkeys.size(); j++)
+            {
+                if (secp256k1_verify(signingKey, signingHash, sig))
+                {
+                    if (sigindex == j)
+                        throw runtime_error("Already signed with this privkey.");
+                    newStack.push_back(stack[i]);
+                    nextsig = j + 1;
+                    break;
+                }
+
+                if (sigindex == j)
+                {
+                    sig = secp256k1_sign_rfc6979(signingKey, signingHash);
+                    sig.push_back(Coin::SIGHASH_ALL);
+                    newStack.push_back(sig);
+                    nextsig = j + 1;
+                    didSign = true;
+                    break;
+                }
+            }
+
+            if (j == (int)pubkeys.size())
+                throw runtime_error("Invalid signature.");
+
+            if (newStack.size() == minsigs) break;
+        }
+
+        if (!didSign)
+            throw runtime_error("Transaction already signed");        
+                  
+        newStack.push_back(redeemscript);
+        stack = newStack;
+
+        bool verbose = (argc > 4 ? (strtoul(argv[4], NULL, 0) != 0) : false);
         if (verbose)
         {
             cout << endl << "witness: " << tx.witness.getSerialized(false).getHex() << endl;
