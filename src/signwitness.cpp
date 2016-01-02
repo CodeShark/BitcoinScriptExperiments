@@ -7,7 +7,7 @@
 
 #include <CoinQ/CoinQ_script.h>
 
-const unsigned char ADDRESS_VERSIONS[] = {111, 196};
+const unsigned char ADDRESS_VERSIONS[] = {30, 50};
 
 using namespace Coin;
 using namespace CoinCrypto;
@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
         cout << "data to hash: " << ss.getHex() << endl;
         uchar_vector signingHash = sha256_2(ss);
 
-        bytes_t sig = secp256k1_sign(signingKey, signingHash);
+        bytes_t sig = secp256k1_sign_rfc6979(signingKey, signingHash);
         sig.push_back(SIGHASH_ALL);
 
         uchar_vector witness;
