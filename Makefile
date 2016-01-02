@@ -10,7 +10,7 @@ LIBS = \
     -lboost_regex$(BOOST_SUFFIX) \
     -lcrypto
 
-all: no_lib_support build/signwitnesstx${EXE_EXT}
+all: no_lib_support build/signwitnesstx${EXE_EXT} build/witnessmofn${EXE_EXT}
 
 no_lib_support: build/nestedmofn${EXE_EXT} build/signnestedmofn${EXE_EXT} build/cltv${EXE_EXT} build/signcltv${EXE_EXT} build/witness${EXE_EXT} build/signwitness${EXE_EXT}
 
@@ -33,4 +33,7 @@ build/signwitness${EXE_EXT}: src/signwitness.cpp
 	$(CXX) $(CXX_FLAGS) $(INCLUDE_PATH) $^ -o $@ $(LIBS)
 
 build/signwitnesstx${EXE_EXT}: src/signwitnesstx.cpp
+	$(CXX) $(CXX_FLAGS) $(INCLUDE_PATH) $^ -o $@ $(LIBS)
+
+build/witnessmofn${EXE_EXT}: src/witnessmofn.cpp
 	$(CXX) $(CXX_FLAGS) $(INCLUDE_PATH) $^ -o $@ $(LIBS)
