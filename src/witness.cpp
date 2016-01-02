@@ -8,7 +8,7 @@
 
 #include <CoinQ/CoinQ_script.h>
 
-const unsigned char ADDRESS_VERSIONS[] = {111, 196};
+const unsigned char ADDRESS_VERSIONS[] = {30, 50};
 
 using namespace Coin;
 using namespace CoinCrypto;
