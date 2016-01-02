@@ -58,52 +58,6 @@ int main(int argc, char* argv[])
         scriptsig += opPushData(witnessscript.size());
         scriptsig += witnessscript;
 
-        uchar_vector hashPrevouts;
-        {
-            uchar_vector ss;
-            ss += outPoint.getSerialized();
-            if (verbose) cout << "prevouts: " << ss.getHex() << endl;
-            hashPrevouts = sha256_2(ss);
-        }
-
-        uchar_vector hashSequence;
-        {
-            uchar_vector ss;
-            ss += uint_to_vch<uint32_t>(0, LITTLE_ENDIAN_); // sequence
-            if (verbose) cout << "sequence: " << ss.getHex() << endl;
-            hashSequence = sha256_2(ss);
-        }
-
-        uchar_vector hashOutputs;
-        {
-            uchar_vector ss;
-            ss += txOut.getSerialized();
-            if (verbose) cout << "outputs: " << ss.getHex() << endl;
-            hashOutputs = sha256_2(ss);
-        }
-
-        uchar_vector ss;
-        ss += uint_to_vch<uint32_t>(1, LITTLE_ENDIAN_); // tx version
-        ss += hashPrevouts;
-        ss += hashSequence;
-        ss += outPoint.getSerialized();
-        ss += VarInt(redeemscript.size()).getSerialized();
-        ss += redeemscript;
-        ss += uint_to_vch(outpointamount, LITTLE_ENDIAN_);
-        ss += uint_to_vch<uint32_t>(0, LITTLE_ENDIAN_); // sequence
-        ss += hashOutputs;
-        ss += uint_to_vch<uint32_t>(0, LITTLE_ENDIAN_); // locktime
-        ss += uint_to_vch<uint32_t>(SIGHASH_ALL, LITTLE_ENDIAN_);
-        if (verbose) cout << "data to hash: " << ss.getHex() << endl;
-        uchar_vector signingHash = sha256_2(ss);
-
-        bytes_t sig = secp256k1_sign_rfc6979(signingKey, signingHash);
-        sig.push_back(SIGHASH_ALL);
-
-        TxInWitness txinwit;
-        txinwit.push(sig);
-        txinwit.push(redeemscript);
-
         TxIn txIn(outPoint, scriptsig, 0);
 
         Transaction tx;
@@ -111,6 +65,14 @@ int main(int argc, char* argv[])
         tx.inputs.push_back(txIn);
         tx.outputs.push_back(txOut);
         tx.lockTime = 0;
+
+        uchar_vector signingHash = tx.getSigHash(Coin::SIGHASH_ALL, 0, redeemscript, outpointamount);
+        bytes_t sig = secp256k1_sign_rfc6979(signingKey, signingHash);
+        sig.push_back(Coin::SIGHASH_ALL);
+
+        TxInWitness txinwit;
+        txinwit.push(sig);
+        txinwit.push(redeemscript);
         tx.witness.txinwits.push_back(txinwit);
 
         if (verbose)
