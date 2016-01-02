@@ -17,9 +17,9 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-    if (argc != 7)
+    if (argc < 7 || argc > 8)
     {
-        cerr << "# Usage: " << argv[0] << " <address> <amount> <outpoint hash> <outpoint index> <outpoint amount> <privkey>" << endl;
+        cerr << "# Usage: " << argv[0] << " <address> <amount> <outpoint hash> <outpoint index> <outpoint amount> <privkey> [verbose = 0]" << endl;
         return -1;
     }
 
@@ -37,6 +37,8 @@ int main(int argc, char* argv[])
         uint64_t outpointamount = strtoull(argv[5], NULL, 0);
         uchar_vector privkey(argv[6]);
         if (privkey.size() != 32) throw runtime_error("Invalid private key length.");
+
+        bool verbose = (argc > 7 ? (strtoul(argv[7], NULL, 0) != 0) : false);
 
         secp256k1_key signingKey;
         signingKey.setPrivKey(privkey);
@@ -60,7 +62,7 @@ int main(int argc, char* argv[])
         {
             uchar_vector ss;
             ss += outPoint.getSerialized();
-            cout << "prevouts: " << ss.getHex() << endl;
+            if (verbose) cout << "prevouts: " << ss.getHex() << endl;
             hashPrevouts = sha256_2(ss);
         }
 
@@ -68,7 +70,7 @@ int main(int argc, char* argv[])
         {
             uchar_vector ss;
             ss += uint_to_vch<uint32_t>(0, LITTLE_ENDIAN_); // sequence
-            cout << "sequence: " << ss.getHex() << endl;
+            if (verbose) cout << "sequence: " << ss.getHex() << endl;
             hashSequence = sha256_2(ss);
         }
 
@@ -76,7 +78,7 @@ int main(int argc, char* argv[])
         {
             uchar_vector ss;
             ss += txOut.getSerialized();
-            cout << "outputs: " << ss.getHex() << endl;
+            if (verbose) cout << "outputs: " << ss.getHex() << endl;
             hashOutputs = sha256_2(ss);
         }
 
@@ -92,7 +94,7 @@ int main(int argc, char* argv[])
         ss += hashOutputs;
         ss += uint_to_vch<uint32_t>(0, LITTLE_ENDIAN_); // locktime
         ss += uint_to_vch<uint32_t>(SIGHASH_ALL, LITTLE_ENDIAN_);
-        cout << "data to hash: " << ss.getHex() << endl;
+        if (verbose) cout << "data to hash: " << ss.getHex() << endl;
         uchar_vector signingHash = sha256_2(ss);
 
         bytes_t sig = secp256k1_sign_rfc6979(signingKey, signingHash);
@@ -111,8 +113,15 @@ int main(int argc, char* argv[])
         tx.lockTime = 0;
         tx.witness.txinwits.push_back(txinwit);
 
-        cout << endl << "witness: " << tx.witness.getSerialized(false).getHex() << endl;
-        cout << endl << "tx: " << tx.getSerializedWithWitness().getHex() << endl;
+        if (verbose)
+        {
+            cout << endl << "witness: " << tx.witness.getSerialized(false).getHex() << endl;
+            cout << endl << "tx: " << tx.getSerializedWithWitness().getHex() << endl;
+        }
+        else
+        {
+            cout << tx.getSerializedWithWitness().getHex() << endl;
+        }
     }
     catch (const exception& e)
     {
