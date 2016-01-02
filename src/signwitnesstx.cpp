@@ -45,17 +45,12 @@ int main(int argc, char* argv[])
         uchar_vector pubkey = signingKey.getPubKey();
 
         uchar_vector redeemscript;
-        redeemscript << opPushData(pubkey.size()) << pubkey << OP_CHECKSIG;
-
-        uchar_vector scripthash = sha256(redeemscript);
+        redeemscript << pushStackItem(pubkey) << OP_CHECKSIG;
 
         uchar_vector witnessscript;
-        witnessscript << OP_1 << opPushData(scripthash.size()) << scripthash;
+        witnessscript << OP_1 << pushStackItem(sha256(redeemscript));
 
-        uchar_vector scriptsig;
-        scriptsig << opPushData(witnessscript.size()) << witnessscript;
-
-        TxIn txIn(outPoint, scriptsig, 0);
+        TxIn txIn(outPoint, pushStackItem(witnessscript), 0);
 
         Transaction tx;
         tx.version = 1;
