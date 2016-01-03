@@ -121,37 +121,55 @@ int main(int argc, char* argv[])
             int j = nextsig;
             for (; j < (int)pubkeys.size(); j++)
             {
-                if (secp256k1_verify(signingKey, signingHash, sig))
+                uchar_vector verifiedSig;
+                secp256k1_key verificationKey;
+                verificationKey.setPubKey(pubkeys[j]);
+                if (verbose) cout << "verificationKey: " << pubkeys[j].getHex() << endl;
+
+                bool verified = secp256k1_verify(verificationKey, signingHash, sig);
+                if (verified)
                 {
                     if (verbose) cout << "verify succeeded. stack: " << i << "   pubkey: " << j << endl; 
                     if (sigindex == j)
                         throw runtime_error("Already signed with this privkey.");
+
                     newStack.push_back(stack[i]);
                     nextsig = j + 1;
                     break;
                 }
+                    
+ /* 
+                {
+                    if (sigindex == j)
+                        throw runtime_error("Already signed with this privkey.");
 
+                    verifiedSig = stack[i];
+                    i++;
+                    nextsig = j + 1;
+                }
+*/
                 if (sigindex == j)
                 {
                     if (verbose) cout << "signing. stack: " << i << "   pubkey: " << j << endl; 
-                    sig = secp256k1_sign_rfc6979(signingKey, signingHash);
+                    uchar_vector sig = secp256k1_sign_rfc6979(signingKey, signingHash);
                     sig.push_back(Coin::SIGHASH_ALL);
                     newStack.push_back(sig);
-                    nextsig = j + 1;
+                    nextsig = sigindex + 1;
                     didSign = true;
                     break;
                 }
             }
 
+            if (newStack.size() == minsigs) break;
+
             if (j == (int)pubkeys.size())
                 throw runtime_error("Invalid signature.");
 
-            if (newStack.size() == minsigs) break;
         }
-
+/*
         if (newStack.size() == minsigs && !didSign)
             throw runtime_error("Transaction already signed");        
-                  
+*/                  
         newStack.push_back(redeemscript);
         stack = newStack;
 
