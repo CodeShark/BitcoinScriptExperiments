@@ -58,12 +58,14 @@ int main(int argc, char* argv[])
         tx.outputs.push_back(txOut);
         tx.lockTime = 0;
 
+        tx.inputs[0].scriptWitness.push(OP_0);
+        tx.inputs[0].scriptWitness.push(redeemscript);
+
         uchar_vector signingHash = tx.getSigHash(Coin::SIGHASH_ALL, 0, redeemscript, outpointamount);
         bytes_t sig = secp256k1_sign_rfc6979(signingKey, signingHash);
         sig.push_back(Coin::SIGHASH_ALL);
 
-        tx.inputs[0].scriptWitness.push(sig);
-        tx.inputs[0].scriptWitness.push(redeemscript);
+        tx.inputs[0].scriptWitness.stack[0] = sig;
 
         if (verbose)
         {
