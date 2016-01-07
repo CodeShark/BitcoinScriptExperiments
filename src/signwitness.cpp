@@ -93,12 +93,12 @@ int main(int argc, char* argv[])
         ss += uint_to_vch<uint32_t>(0, LITTLE_ENDIAN_); // sequence
         ss += hashOutputs;
         ss += uint_to_vch<uint32_t>(0, LITTLE_ENDIAN_); // locktime
-        ss += uint_to_vch<uint32_t>(SIGHASH_ALL, LITTLE_ENDIAN_);
+        ss += uint_to_vch<uint32_t>(Coin::SIGHASH_ALL, LITTLE_ENDIAN_);
         if (verbose) cout << "data to hash: " << ss.getHex() << endl;
         uchar_vector signingHash = sha256_2(ss);
 
         bytes_t sig = secp256k1_sign_rfc6979(signingKey, signingHash);
-        sig.push_back(SIGHASH_ALL);
+        sig.push_back(Coin::SIGHASH_ALL);
 
         uchar_vector witness;
         witness += VarInt(2).getSerialized();

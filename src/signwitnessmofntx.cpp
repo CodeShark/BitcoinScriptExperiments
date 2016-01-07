@@ -29,12 +29,9 @@ int main(int argc, char* argv[])
         uchar_vector rawtx(argv[1]);
         Transaction tx(rawtx);
         if (tx.inputs.size() != 1)
-            throw runtime_error("Invalid transaction type 1.");
+            throw runtime_error("Invalid transaction.");
 
-        if (tx.witness.txinwits.size() != 1)
-            throw runtime_error("Invalid transaction type 2.");
-
-        std::vector<uchar_vector>& stack = tx.witness.txinwits[0].scriptWitness.stack;
+        std::vector<uchar_vector>& stack = tx.inputs[0].scriptWitness.stack;
         if (stack.size() == 0)
             throw runtime_error("Invalid witness type.");
 
@@ -43,7 +40,7 @@ int main(int argc, char* argv[])
             throw runtime_error("Invalid redeemscript 1.");
 
         if (redeemscript.back() != OP_CHECKMULTISIG)
-            throw runtime_error("Invalis redeemscript 2.");
+            throw runtime_error("Invalid redeemscript 2.");
 
         uchar_vector witnessscript;
         witnessscript << OP_1 << pushStackItem(sha256(redeemscript));
@@ -175,7 +172,7 @@ int main(int argc, char* argv[])
 
         if (verbose)
         {
-            cout << endl << "witness: " << tx.witness.getSerialized(false).getHex() << endl;
+            cout << endl << "witness: " << tx.inputs[0].scriptWitness.getSerialized().getHex() << endl;
             cout << endl << "tx: " << tx.getSerializedWithWitness().getHex() << endl;
         }
         else

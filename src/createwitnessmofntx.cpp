@@ -76,9 +76,7 @@ int main(int argc, char* argv[])
         tx.outputs.push_back(txOut);
         tx.lockTime = 0;
 
-        TxInWitness txinwit;
-        txinwit.push(redeemscript);
-        tx.witness.txinwits.push_back(txinwit);
+        tx.inputs[0].scriptWitness.push(redeemscript);
 
         cout << tx.getSerializedWithWitness().getHex() << endl;
     }

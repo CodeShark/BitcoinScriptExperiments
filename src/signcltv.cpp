@@ -52,13 +52,13 @@ int main(int argc, char* argv[])
             tx.outputs.push_back(txOut);
             tx.lockTime = (uint32_t)locktime;
 
-            signingHash = tx.getHashWithAppendedCode(SIGHASH_ALL);
+            signingHash = tx.getHashWithAppendedCode(Coin::SIGHASH_ALL);
         }
 
         secp256k1_key signingKey;
         signingKey.setPrivKey(privkey);
         bytes_t sig = secp256k1_sign(signingKey, signingHash);
-        sig.push_back(SIGHASH_ALL);
+        sig.push_back(Coin::SIGHASH_ALL);
 
         uchar_vector txinscript;
         txinscript += opPushData(sig.size());

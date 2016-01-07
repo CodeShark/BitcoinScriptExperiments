@@ -10,9 +10,23 @@ LIBS = \
     -lboost_regex$(BOOST_SUFFIX) \
     -lcrypto
 
-all: no_lib_support build/signwitnesstx${EXE_EXT} build/witnessmofn${EXE_EXT} build/createwitnessmofntx${EXE_EXT} build/signwitnessmofntx${EXE_EXT}
+NO_LIB_SUPPORT = \
+    build/nestedmofn${EXE_EXT} \
+    build/signnestedmofn${EXE_EXT} \
+    build/cltv${EXE_EXT} \
+    build/signcltv${EXE_EXT} \
+    build/witness${EXE_EXT} \
+    build/signwitness${EXE_EXT}
 
-no_lib_support: build/nestedmofn${EXE_EXT} build/signnestedmofn${EXE_EXT} build/cltv${EXE_EXT} build/signcltv${EXE_EXT} build/witness${EXE_EXT} build/signwitness${EXE_EXT}
+LIB_SUPPORT = \
+    build/signwitnesstx${EXE_EXT} \
+    build/witnessmofn${EXE_EXT} \
+    build/createwitnessmofntx${EXE_EXT} \
+    build/signwitnessmofntx${EXE_EXT}
+
+all: no_lib_support ${LIB_SUPPORT}
+
+no_lib_support: ${NO_LIB_SUPPORT} 
 
 build/nestedmofn${EXE_EXT}: src/nestedmofn.cpp
 	$(CXX) $(CXX_FLAGS) $(INCLUDE_PATH) $^ -o $@ $(LIBS)
@@ -43,3 +57,6 @@ build/createwitnessmofntx${EXE_EXT}: src/createwitnessmofntx.cpp
 
 build/signwitnessmofntx${EXE_EXT}: src/signwitnessmofntx.cpp
 	$(CXX) $(CXX_FLAGS) $(INCLUDE_PATH) $^ -o $@ $(LIBS)
+
+clean:
+	-rm -rf ${NO_LIB_SUPPORT} ${LIB_SUPPORT}

@@ -62,14 +62,12 @@ int main(int argc, char* argv[])
         bytes_t sig = secp256k1_sign_rfc6979(signingKey, signingHash);
         sig.push_back(Coin::SIGHASH_ALL);
 
-        TxInWitness txinwit;
-        txinwit.push(sig);
-        txinwit.push(redeemscript);
-        tx.witness.txinwits.push_back(txinwit);
+        tx.inputs[0].scriptWitness.push(sig);
+        tx.inputs[0].scriptWitness.push(redeemscript);
 
         if (verbose)
         {
-            cout << endl << "witness: " << tx.witness.getSerialized(false).getHex() << endl;
+            cout << endl << "witness: " << tx.inputs[0].scriptWitness.getSerialized().getHex() << endl;
             cout << endl << "tx: " << tx.getSerializedWithWitness().getHex() << endl;
         }
         else
