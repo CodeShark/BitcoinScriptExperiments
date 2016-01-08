@@ -19,6 +19,9 @@ NO_LIB_SUPPORT = \
     build/signwitness${EXE_EXT}
 
 LIB_SUPPORT = \
+    build/mofn${EXE_EXT} \
+    build/createmofntx${EXE_EXT} \
+    build/signmofntx${EXE_EXT} \
     build/signwitnesstx${EXE_EXT} \
     build/witnessmofn${EXE_EXT} \
     build/createwitnessmofntx${EXE_EXT} \
@@ -27,6 +30,15 @@ LIB_SUPPORT = \
 all: no_lib_support ${LIB_SUPPORT}
 
 no_lib_support: ${NO_LIB_SUPPORT} 
+
+build/mofn${EXE_EXT}: src/mofn.cpp
+	$(CXX) $(CXX_FLAGS) $(INCLUDE_PATH) $^ -o $@ $(LIBS)
+
+build/createmofntx${EXE_EXT}: src/createmofntx.cpp
+	$(CXX) $(CXX_FLAGS) $(INCLUDE_PATH) $^ -o $@ $(LIBS)
+
+build/signmofntx${EXE_EXT}: src/signmofntx.cpp
+	$(CXX) $(CXX_FLAGS) $(INCLUDE_PATH) $^ -o $@ $(LIBS)
 
 build/nestedmofn${EXE_EXT}: src/nestedmofn.cpp
 	$(CXX) $(CXX_FLAGS) $(INCLUDE_PATH) $^ -o $@ $(LIBS)
