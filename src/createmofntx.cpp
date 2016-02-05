@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
         tx.outputs.push_back(txOut);
         tx.lockTime = 0;
 
-        cout << tx.getSerializedWithWitness().getHex() << endl;
+        cout << tx.getSerialized().getHex() << endl;
     }
     catch (const exception& e)
     {

@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
         signableTxIn.addsig(pubkey, sig);
         tx.inputs[0].scriptSig = signableTxIn.txinscript();
 
-        cout << tx.getSerializedWithWitness().getHex() << endl;
+        cout << tx.getSerialized().getHex() << endl;
     }
     catch (const exception& e)
     {

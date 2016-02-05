@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
         }
         tx.inputs[0].scriptWitness.push(redeemscript);
 
-        cout << tx.getSerializedWithWitness().getHex() << endl;
+        cout << tx.getSerialized().getHex() << endl;
     }
     catch (const exception& e)
     {

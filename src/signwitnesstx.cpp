@@ -70,11 +70,11 @@ int main(int argc, char* argv[])
         if (verbose)
         {
             cout << endl << "witness: " << tx.inputs[0].scriptWitness.getSerialized().getHex() << endl;
-            cout << endl << "tx: " << tx.getSerializedWithWitness().getHex() << endl;
+            cout << endl << "tx: " << tx.getSerialized().getHex() << endl;
         }
         else
         {
-            cout << tx.getSerializedWithWitness().getHex() << endl;
+            cout << tx.getSerialized().getHex() << endl;
         }
     }
     catch (const exception& e)
