@@ -15,6 +15,7 @@ NO_LIB_SUPPORT = \
     build/signnestedmofn${EXE_EXT} \
     build/cltv${EXE_EXT} \
     build/signcltv${EXE_EXT} \
+    build/signcsv${EXE_EXT} \
     build/witness${EXE_EXT} \
     build/signwitness${EXE_EXT}
 
@@ -50,6 +51,9 @@ build/cltv${EXE_EXT}: src/cltv.cpp
 	$(CXX) $(CXX_FLAGS) $(INCLUDE_PATH) $^ -o $@ $(LIBS)
 
 build/signcltv${EXE_EXT}: src/signcltv.cpp
+	$(CXX) $(CXX_FLAGS) $(INCLUDE_PATH) $^ -o $@ $(LIBS)
+
+build/signcsv${EXE_EXT}: src/signcsv.cpp
 	$(CXX) $(CXX_FLAGS) $(INCLUDE_PATH) $^ -o $@ $(LIBS)
 
 build/witness${EXE_EXT}: src/witness.cpp
