@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
         redeemscript << (OP_1_OFFSET + pubkeys.size()) << OP_CHECKMULTISIG;
 
         uchar_vector witnessscript;
-        witnessscript << OP_1 << pushStackItem(sha256(redeemscript));
+        witnessscript << OP_0 << pushStackItem(sha256(redeemscript));
 
         uchar_vector txoutscript;
         txoutscript << OP_HASH160 << pushStackItem(hash160(witnessscript)) << OP_EQUAL;

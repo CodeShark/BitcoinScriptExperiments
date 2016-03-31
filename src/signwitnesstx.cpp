@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
         redeemscript << pushStackItem(pubkey) << OP_CHECKSIG;
 
         uchar_vector witnessscript;
-        witnessscript << OP_1 << pushStackItem(sha256(redeemscript));
+        witnessscript << OP_0 << pushStackItem(sha256(redeemscript));
 
         TxIn txIn(outPoint, pushStackItem(witnessscript), 0);
 

@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
 
         uchar_vector scripthash = sha256(redeemscript);
         uchar_vector witnessscript;
-        witnessscript.push_back(OP_1);
+        witnessscript.push_back(OP_0);
         witnessscript += opPushData(scripthash.size());
         witnessscript += scripthash;
 
